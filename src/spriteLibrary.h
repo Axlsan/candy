@@ -4,13 +4,10 @@
 
 enum class SPRITE_ID{
   Fallback,
-  Button_Basic,
   black_1x1,
+  Button_Basic,
   Wall,
-  Square,
-  Sphere,
-  Triangle,
-  Plus
+  Ground,
 };
 
 const int NOT_SET = -1;
