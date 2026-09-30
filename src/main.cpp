@@ -115,7 +115,7 @@ void SDL_Setup(){
     SDL_SetLogPriorities(SDL_LOG_PRIORITY_VERBOSE);
     TTF_Init();
 
-    window = SDL_CreateWindow("candy", SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    window = SDL_CreateWindow("hell of a time", SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     renderer = SDL_CreateRenderer(window, NULL);
 }
 
@@ -244,6 +244,9 @@ int main() {
 
         gameData->input.keys_current = SDL_GetKeyboardState(nullptr);
 
+        loop(monkey, 5){
+            
+        }
 
         
         float* delta_x = &gameData->input.mouse_x_delta;

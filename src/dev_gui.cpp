@@ -65,7 +65,6 @@ void DrawAudioMemoryPanel(AudioSystem* audio) {
 }
 
 
-
 void DEV::Draw(GameData* data, SDL_Renderer* renderer){
   ImGui::Begin("Dev Tools");
   ImGui::Text("memory arena usage amount");
@@ -83,6 +82,11 @@ void DEV::Draw(GameData* data, SDL_Renderer* renderer){
   DrawFPS(data);
 
   ImGui::SliderFloat("deltaTimeScaler", data->dt_scaler, 0.1, 3);  
+
+  Input* input = &data->input;
+  ImGui::Text("MX:%1f MY:%1f", input->mouse_x, input->mouse_y);
+  // ImGui::SliderFloat("velocity", &data->bird.velocity, Bird::FLAP_STR, Bird::MAX_VELOCITY);
+  ImGui::SliderInt("score", &data->score, 0, 100);
   
   ImGui::End();
 
