@@ -1,13 +1,20 @@
 #pragma once
 
 #include "SDL3/SDL_render.h"
+#include "entity.h"
 
 enum class SPRITE_ID{
   Fallback,
   black_1x1,
   Button_Basic,
+  Background,
+  BackgroundAlt,
   Wall,
-  Ground,
+  // Ground,
+  Square,
+  Sphere,
+  Triangle,
+  Plus
 };
 
 const int NOT_SET = -1;
@@ -71,6 +78,8 @@ struct SpriteDataEntry{
 
 
 Sprite* GetSprite(SPRITE_ID sprite_id, Sprite* spriteBuffer);
+
+Sprite* GetSpriteFromEntityID(ENTITY_ID entityID, Sprite* spriteBuffer);
 
 namespace AssetManagement
 {

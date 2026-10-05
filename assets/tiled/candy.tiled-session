@@ -19,8 +19,8 @@
             "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 275,
-                "y": 236.99999999999997
+                "x": 253.66666666666663,
+                "y": 303.33333333333326
             }
         },
         "shapes.tsx": {
@@ -29,7 +29,9 @@
             "scaleInEditor": 11
         }
     },
+    "last.exportedFilePath": "E:/GameDev/candy/assets/levels",
     "last.imagePath": "E:/GameDev/candy/assets/sprites",
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 16,
     "map.tileWidth": 16,

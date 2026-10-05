@@ -64,6 +64,9 @@ void DrawAudioMemoryPanel(AudioSystem* audio) {
   ImGui::ProgressBar(fraction, ImVec2(-1, 0), overlay);
 }
 
+void DrawEntityID(GameData* data){
+  
+}
 
 
 void DEV::Draw(GameData* data, SDL_Renderer* renderer){
@@ -83,6 +86,8 @@ void DEV::Draw(GameData* data, SDL_Renderer* renderer){
   DrawFPS(data);
 
   ImGui::SliderFloat("deltaTimeScaler", data->dt_scaler, 0.1, 3);  
+
+  ImGui::Text("MX:%1f MY:%1f", data->input.mouse_x, data->input.mouse_y);
   
   ImGui::End();
 

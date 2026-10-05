@@ -115,7 +115,7 @@ void SDL_Setup(){
     SDL_SetLogPriorities(SDL_LOG_PRIORITY_VERBOSE);
     TTF_Init();
 
-    window = SDL_CreateWindow("hell of a time", SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    window = SDL_CreateWindow("candy", SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     renderer = SDL_CreateRenderer(window, NULL);
 }
 
@@ -173,6 +173,13 @@ int main() {
     gameData->arena_images = Memory::CreateSubArena(arena_main, IMAGE_ARENA_SIZE);
     gameData->spriteBuffer = ALLOC_ARRAY(gameData->arena_images, Sprite, SPRITE_COUNT);
 
+
+    gameData->arena_levels = Memory::CreateSubArena(arena_main, MEGABYTES(3));
+    gameData->arena_entities = Memory::CreateSubArena(gameData->arena_levels, MEGABYTES(1));
+        
+    gameData->scenes.gameplay.lvlCount = 1;
+    gameData->scenes.gameplay.lvls = ALLOC_ARRAY(gameData->arena_levels, Level, gameData->scenes.gameplay.lvlCount);
+    
     gameData->editor_data.fps_buffer_count = 500;
     gameData->editor_data.fps_buffer = ALLOC_ARRAY(arena_main, float, gameData->editor_data.fps_buffer_count);
 

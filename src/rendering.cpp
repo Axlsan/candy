@@ -52,6 +52,11 @@ void RenderSprite_World(SpriteRenderInfo spriteRenderInfo, SDL_Renderer* rendere
   SDL_RenderTextureRotated(renderer, sprite->texture, &tilesetRect, &rect, 0, 0, flip);
 }
 
+void RenderSprite_Grid(Sprite* sprite, Level* lvl, SDL_Renderer* renderer, const Camera* camera, float xPos, float yPos, float scale, float alpha, bool flipped){
+  camera::GridToWorld(&xPos, &yPos, lvl);
+  RenderSprite_World(sprite, renderer, camera, xPos, yPos);
+}
+
 
 void RenderButton(Button* button, bool is_selected, SDL_Renderer* renderer){
   SDL_Texture* texture =button->sprite->texture;

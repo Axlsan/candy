@@ -9,4 +9,6 @@ extern "C" {
    __declspec(dllexport) void Draw(GameData* data, SDL_Renderer* renderer);
    __declspec(dllexport) void Update(GameData* data, float dt);
    __declspec(dllexport) void OnQuit(SDL_Renderer* renderer);
+
+   void ChangeScene(GameData* data, SCENE_TYPES newScene);
 }
