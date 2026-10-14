@@ -7,6 +7,7 @@ enum class SPRITE_ID{
   Fallback,
   black_1x1,
   Button_Basic,
+  Beach,
   Background,
   BackgroundAlt,
   Wall,
@@ -14,7 +15,10 @@ enum class SPRITE_ID{
   Square,
   Sphere,
   Triangle,
-  Plus
+  Plus,
+  Matched,
+  OceanTitle,
+  Logo
 };
 
 const int NOT_SET = -1;

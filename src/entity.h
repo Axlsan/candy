@@ -11,7 +11,8 @@ enum class ENTITY_ID : uint8_t{
   SQUARE = 4,
   SPHERE = 5,
   TRIANGLE = 6,
-  PLUS = 7
+  PLUS = 7,
+  MATCHED = 8
 };
 
 struct Entity{

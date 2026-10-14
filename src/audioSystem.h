@@ -14,7 +14,10 @@ enum class SFX_ID{
 
 enum class SONG_ID{
   NONE,
-  THEME
+  THEME,
+  WAVES
+  
+  
 };
 
 struct SoundDataEntry{
@@ -32,13 +35,15 @@ struct AudioSystem{
   SONG_ID song_id;
   FMOD_SOUND* song;
   FMOD_CHANNEL* song_channel;
+  FMOD_SOUND* soundWaves;
+  FMOD_CHANNEL* soundWaves_channel;
 };
 
 // global promise
 extern AudioSystem* g_audioSystem;
 
 
-void PlaySong(SONG_ID id);
+void PlaySong(SONG_ID id, float volume = 1);
 void PlaySFX(SFX_ID id, float volume = 1);
 void InitializeAudioSystem(AudioSystem* audio, Memory::Arena* arena_main);
 void UpdateAudio(AudioSystem* audio);

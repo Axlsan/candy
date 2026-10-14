@@ -66,17 +66,40 @@ void PlaySFX(SFX_ID id, float volume){
   FMOD_Channel_SetVolume(*channel_slot, volume);
 }
 
-void PlaySong(SONG_ID id){
+void PlaySong(SONG_ID id, float volume){
   g_audioSystem->song_id = id;
-  if(g_audioSystem->song != nullptr){
-    FMOD_Channel_Stop(g_audioSystem->song_channel);
-    FMOD_Sound_Release(g_audioSystem->song);
-  }
+  // if(g_audioSystem->song != nullptr){
+  //   FMOD_Channel_Stop(g_audioSystem->song_channel);
+  //   FMOD_Sound_Release(g_audioSystem->song);
+  // }
   FMOD_SYSTEM* system = g_audioSystem->sound_system;
+
+  int INFINITE = -1;
+  
   const char* song_name;
   switch (id) {
   case SONG_ID::THEME:
-    song_name = "assets/audio/music/hellofatime.mp3";
+    if(g_audioSystem->song != nullptr){
+      FMOD_Channel_Stop(g_audioSystem->song_channel);
+      FMOD_Sound_Release(g_audioSystem->song);
+    }
+    song_name = "assets/audio/music/rain.mp3";
+    FMOD_System_CreateStream(system, song_name, FMOD_LOOP_NORMAL, nullptr, &g_audioSystem->song);
+    FMOD_Sound_SetLoopCount(g_audioSystem->song, INFINITE);
+    FMOD_System_PlaySound(system, g_audioSystem->song, nullptr, false, &g_audioSystem->song_channel);
+    FMOD_Channel_SetVolume(g_audioSystem->song_channel, 0.025);
+    // FMOD_SOUND
+    break;
+  case SONG_ID::WAVES:
+    if(g_audioSystem->soundWaves != nullptr){
+      FMOD_Channel_Stop(g_audioSystem->soundWaves_channel);
+      FMOD_Sound_Release(g_audioSystem->soundWaves);
+    }
+    song_name = "assets/audio/music/waves.mp3";
+    FMOD_System_CreateStream(system, song_name, FMOD_LOOP_NORMAL, nullptr, &g_audioSystem->soundWaves);
+    FMOD_Sound_SetLoopCount(g_audioSystem->soundWaves, INFINITE);
+    FMOD_System_PlaySound(system, g_audioSystem->soundWaves, nullptr, false, &g_audioSystem->soundWaves_channel);
+    FMOD_Channel_SetVolume(g_audioSystem->soundWaves_channel, 0.2);
     break;
   case SONG_ID::NONE:
     break;
@@ -84,10 +107,10 @@ void PlaySong(SONG_ID id){
 
 
 
-  FMOD_System_CreateStream(system, song_name, FMOD_LOOP_NORMAL, nullptr, &g_audioSystem->song);
-  int INFINITE = -1;
-  FMOD_Sound_SetLoopCount(g_audioSystem->song, INFINITE);
-  FMOD_System_PlaySound(system, g_audioSystem->song, nullptr, false, &g_audioSystem->song_channel);
+  // FMOD_System_CreateStream(system, song_name, FMOD_LOOP_NORMAL, nullptr, &g_audioSystem->song);
+  // int INFINITE = -1;
+  // FMOD_Sound_SetLoopCount(g_audioSystem->song, INFINITE);
+  // FMOD_System_PlaySound(system, g_audioSystem->song, nullptr, false, &g_audioSystem->song_channel);
 }
 
 void Update(AudioSystem* audio){

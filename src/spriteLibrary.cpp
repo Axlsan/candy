@@ -11,6 +11,7 @@ static const SpriteDataEntry all_sprite_data[] = {
   {SPRITE_ID::Fallback, FALLBACK_PATH,8,8},
   {SPRITE_ID::black_1x1, "assets/sprites/1x1_black.png",0,0},
   {SPRITE_ID::Button_Basic, "assets/sprites/basic_button.png",0,0,3,3},
+  {SPRITE_ID::Beach, "assets/sprites/beach5.png"},
   {SPRITE_ID::Background, "assets/sprites/background.png"},
   {SPRITE_ID::BackgroundAlt, "assets/sprites/backgroundAlt.png"},
   {SPRITE_ID::Wall, "assets/sprites/wall.png"},
@@ -18,6 +19,9 @@ static const SpriteDataEntry all_sprite_data[] = {
   {SPRITE_ID::Sphere, "assets/sprites/sphere.png"},
   {SPRITE_ID::Triangle, "assets/sprites/triangle.png"},
   {SPRITE_ID::Plus, "assets/sprites/plus.png"},
+  {SPRITE_ID::Matched, "assets/sprites/1x1_black.png"},
+  {SPRITE_ID::OceanTitle, "assets/sprites/Ocean_Title.png"},
+  {SPRITE_ID::Logo, "assets/sprites/logo.png"},
   };
 
 Sprite* GetSprite(SPRITE_ID spriteID, Sprite* spriteBuffer){
@@ -34,6 +38,7 @@ Sprite* GetSpriteFromEntityID(ENTITY_ID id, Sprite* spriteBuffer){
   Sprite* sprite = nullptr;
 
   switch(id){
+    case ENTITY_ID::MATCHED:
     case ENTITY_ID::NONE:
       sprite = nullptr;
       break;

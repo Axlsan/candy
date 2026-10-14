@@ -3,6 +3,7 @@
 #include "audioSystem.h"
 #include "camera.h"
 #include "command.h"
+#include "common.h"
 #include "fontLibrary.h"
 #include "imgui/imgui_internal.h"
 #include "input.h"
@@ -25,6 +26,11 @@ struct Gameplay{
   // int inputBufferWriteCount;
   // int inputBufferReadCount;
   bool initialized;
+
+  Entity* firstSelection;
+  Entity* secondSelection;
+
+  bool animationInProgress;
 };
 
 struct MainMenu{
@@ -33,6 +39,14 @@ struct MainMenu{
 
 struct TitleScreen{
   
+  SDL_Texture* oceanTex;
+  SDL_FRect oceanRect;
+  
+  SDL_Texture* logoTex;
+  SDL_FRect logoRect;
+
+  float oceanProgress;
+  float logoProgress;
 };
 
 struct Credits{

@@ -35,14 +35,14 @@ void RenderLevel(GameData* data, SDL_Renderer* renderer){
 void RenderEntities(GameData* data, SDL_Renderer* renderer){
   Level* lvl = &data->scenes.gameplay.lvls[data->scenes.gameplay.currentLvlIndex];
 
-  Entity** SortedEntities = ALLOC_ARRAY(data->arena_scratch, Entity*, lvl->EntityCount);
-  for(int i = 0; i < lvl->EntityCount; i++){
+  Entity** SortedEntities = ALLOC_ARRAY(data->arena_scratch, Entity*, lvl->entityCount);
+  for(int i = 0; i < lvl->entityCount; i++){
     SortedEntities[i] = &lvl->shapeBuffer[i];
   }
 
-  std::sort(SortedEntities, SortedEntities + lvl->EntityCount, IsEntityBelowOtherEntity);
+  std::sort(SortedEntities, SortedEntities + lvl->entityCount, IsEntityBelowOtherEntity);
 
-  for(int i = 0; i < lvl->EntityCount; i++){
+  for(int i = 0; i < lvl->entityCount; i++){
     Entity* entity = SortedEntities[i];
     if(entity->id == ENTITY_ID::NONE){
       continue;

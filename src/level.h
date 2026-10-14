@@ -3,16 +3,27 @@
 #include "entity.h"
 #include "arena.h"
 #include <cstdint>
+#include <cstdlib>
+#include <vector>
 
 using namespace Memory;
+using namespace std;
 
 struct Level{
+
+  
   int w;
   int h;
+
+  // vector<vector<int>> map = {};
+  
+  
   uint8_t* cells;
   const char* levelPath;
   Entity* shapeBuffer;
-  int EntityCount;
+  int entityCount;
+
+  int score;
 };
 
 uint8_t GetCellID(Level* lvlData, int x, int y);
@@ -25,3 +36,5 @@ void CreateLevel(Arena* arena, Level* lvl, const char* levelName);
 void CreateEntities(Arena* arena, Level* lvl);
 
 uint8_t* GetPlayableCells(Level* lvl);
+
+void InitializeLevel(Arena* arena_levels, Level* lvl, int w, int h);
