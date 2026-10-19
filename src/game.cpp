@@ -18,6 +18,7 @@
 #include "input.h"
 #include "level.h"
 #include "levelRenderer.h"
+#include "rendering.h"
 #include "spriteLibrary.h"
 #include <array>
 #include <cstddef>
@@ -25,17 +26,20 @@
 #include <cstring>
 #include <map>
 #include <optional>
+#include <string>
 #include <vector>
 using namespace Memory;
 
 extern "C" {
 
   void SetUpBoilerplate(GameData* data, SDL_Window* window, SDL_Renderer* renderer){
+    #ifndef NDEBUG
     DEV::Initialize(window, renderer);
+    data->imGui_context = ImGui::GetCurrentContext();
+    #endif
     InitializeAudioSystem(&data->audio, data->arena_main);
     AssetManagement::LoadAllSFX(&data->audio);
     AssetManagement::LoadAllSprites(data->spriteBuffer, renderer);
-    data->imGui_context = ImGui::GetCurrentContext();
     AssetManagement::LoadFont(renderer, "assets/fonts/ByteBounce.ttf", &data->font, 48);
 
     SDL_Texture* blackfade = GetSprite(SPRITE_ID::black_1x1, data->spriteBuffer)->texture;
@@ -66,6 +70,9 @@ extern "C" {
 
     data->scenes.titleScreen.oceanProgress = 0.0;
     data->scenes.titleScreen.logoProgress = 0.0;
+
+    data->scenes.titleScreen.textyText = false;
+    data->scenes.titleScreen.textTimer = 0;
   }
   
   void InitializeGame(Gameplay* gameplay, Arena* arena_levels){
@@ -78,7 +85,7 @@ extern "C" {
   void UpdateTitleScreen(TitleScreen* titleScreen, Input* input, const float dt){
     // BACKGROUND ANIMATION
     // length
-    titleScreen->oceanProgress += dt / 5.0;
+    titleScreen->oceanProgress += dt / 8.0;
     if(titleScreen->oceanProgress > 1.0){
       titleScreen->oceanProgress = 1.0;
     }
@@ -88,7 +95,9 @@ extern "C" {
 
     // LOGO ANIMATION
     // length
-    titleScreen->logoProgress += dt / 3.0;
+    if(titleScreen->textTimer >= 3){
+      titleScreen->logoProgress += dt / 3.0;
+    }
     if(titleScreen->logoProgress > 1.0){
       titleScreen->logoProgress = 1.0;
     }
@@ -96,8 +105,22 @@ extern "C" {
     float logoEased = 1 - (1 - titleScreen->logoProgress) * (1 - titleScreen->logoProgress);
     titleScreen->logoRect.y = -((SCREEN_HEIGHT*1.3-SCREEN_HEIGHT)/2) * logoEased;
 
-    SDL_SetTextureAlphaModFloat(titleScreen->logoTex, eased);
+    if(titleScreen->textTimer <= 3.0){
+      SDL_SetTextureAlphaModFloat(titleScreen->logoTex, 0.0);
+    }
+    else{
+      SDL_SetTextureAlphaModFloat(titleScreen->logoTex, logoEased);
+    }
     
+    // textytext
+    titleScreen->textTimer += dt;
+
+    if(titleScreen->textTimer >= 8 && (int)titleScreen->textTimer % 3 != 1){
+      titleScreen->textyText = true;
+    }
+    else{
+      titleScreen->textyText = false;
+    }
 
     if(KeyPressed(input, SDL_SCANCODE_RETURN)){
       // ChangeScene(data, SCENE_TYPES::GAME);
@@ -670,8 +693,8 @@ extern "C" {
 
     
         
-    // ChangeScene(data, SCENE_TYPES::TITLESCREEN);
-    ChangeScene(data, SCENE_TYPES::GAME);
+    ChangeScene(data, SCENE_TYPES::TITLESCREEN);
+    // ChangeScene(data, SCENE_TYPES::GAME);
 
     PlaySong(SONG_ID::THEME);
     PlaySong(SONG_ID::WAVES);
@@ -680,7 +703,9 @@ extern "C" {
   }
    
    bool HandleEvents(GameData *data, SDL_Event event){
+    #ifndef NDEBUG
     DEV::ProcessEvents(&event);
+    #endif
 
     if(event.type != SDL_EVENT_KEY_DOWN){
         return true;
@@ -718,14 +743,16 @@ extern "C" {
     }
 
     switch (data->sceneCurrent) {
-      case SCENE_TYPES::TITLESCREEN:
+      case SCENE_TYPES::TITLESCREEN:{
         UpdateTitleScreen(titleScreen, &data->input, dt);
         if(KeyPressed(&data->input, SDL_SCANCODE_RETURN)){
           if(transition->state == Transition::FadeTo || transition->state == Transition::Inactive){
             ChangeScene(data, SCENE_TYPES::GAME);
           }
         }
+
         break;
+      }
 
       case SCENE_TYPES::MAINMENU:
         break;
@@ -753,6 +780,11 @@ extern "C" {
       case SCENE_TYPES::TITLESCREEN:{
         SDL_RenderTexture(renderer, data->scenes.titleScreen.oceanTex, NULL, &data->scenes.titleScreen.oceanRect);
         SDL_RenderTexture(renderer, data->scenes.titleScreen.logoTex, NULL, &data->scenes.titleScreen.logoRect);
+        
+        std::string text = "Press the Return key to start"; 
+        if(data->scenes.titleScreen.textyText){
+          RenderText(&data->font, text.c_str(), renderer, nullptr, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 * 2, Alignment::Centered);
+        }
         break;
       }
 
@@ -766,6 +798,8 @@ extern "C" {
         SDL_RenderTexture(renderer, beachTex, NULL, &beachRect);
         RenderLevel(data, renderer);
         RenderEntities(data, renderer);
+        std::string text = "Score: " + std::to_string(data->scenes.gameplay.lvls[data->scenes.gameplay.currentLvlIndex].score); 
+        RenderText(&data->font, text.c_str(), renderer, nullptr, SCREEN_WIDTH - 200, SCREEN_HEIGHT - 66, Alignment::Left);
         break;
       }
         
@@ -778,7 +812,9 @@ extern "C" {
   }
   
   void Draw(GameData* data, SDL_Renderer* renderer){
+    #ifndef NDEBUG
     DEV::PreDraw(data->imGui_context);
+    #endif
     SDL_SetRenderDrawColor(renderer, 155, 155, 155, 255);
     SDL_RenderClear(renderer);
 
@@ -821,7 +857,9 @@ extern "C" {
     }
     
     
+    #ifndef NDEBUG
     DEV::Draw(data, renderer);
+    #endif
     SDL_RenderPresent(renderer);
   }
 

@@ -48,6 +48,9 @@ struct TitleScreen{
 
   float oceanProgress;
   float logoProgress;
+
+  bool textyText;
+  float textTimer;
 };
 
 struct Credits{
