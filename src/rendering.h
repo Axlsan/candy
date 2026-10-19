@@ -12,8 +12,8 @@ enum class Alignment {
 };
 
 
-void RenderSprite_World(SpriteRenderInfo spriteInfo, SDL_Renderer* renderer, const Camera* camera, float x, float y, float scale = 1, float alpha = 1, bool flipped = false);
-void RenderSprite_Grid(Sprite* sprite, Level* lvl, SDL_Renderer* renderer, const Camera* camera, float x, float y, float scale = 1, float alpha = 1, bool flipped = false);
+void RenderSprite_World(SpriteRenderInfo spriteInfo, SDL_Renderer* renderer, const Camera* camera, float x, float y, float scale = 1, float alpha = 1, bool flipped = false, bool scaleUp = false);
+void RenderSprite_Grid(Sprite* sprite, Level* lvl, SDL_Renderer* renderer, const Camera* camera, float x, float y, float scale = 1, float alpha = 1, bool flipped = false, bool scaleUp = false);
 void RenderButton(Button* button, bool is_selected, SDL_Renderer* renderer);
 void RenderButton_Dynamic(Button* button, bool is_selected, SDL_Renderer* renderer);
 void RenderText(FontAtlas* atlas, const char* text, SDL_Renderer* renderer, Camera* camera, const float x, const float y, Alignment alignment);

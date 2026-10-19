@@ -19,6 +19,7 @@
 #include "level.h"
 #include "levelRenderer.h"
 #include "spriteLibrary.h"
+#include <array>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
@@ -127,121 +128,20 @@ extern "C" {
     return false;
   }
 
-
-  void WaitForSwapAni(Gameplay* gameplay, Level* lvl, float dt){
-    float duration = 1.0;
-    bool animating;
-    for(int i = 0; i < lvl->entityCount; i++){
-      Entity& entity = lvl->shapeBuffer[i];
-      if(entity.id == ENTITY_ID::NONE){
-        continue;
-      }
-
-
-      if(entity.progress01 < 1.0){
-        entity.progress01 += dt / duration;
-
-        if(entity.progress01 > 1.0){
-          entity.progress01 = 1.0;
-        }
-        else{
-          animating = true;
-        }
-      }
-
-      if(animating){
-        gameplay->animationInProgress = true;
-      }
+  void ClearEntitySelection(Gameplay* gameplay){
+    if(gameplay->firstSelection != nullptr){
+      gameplay->firstSelection->scaleUp = false;
+      gameplay->firstSelection->scaleTimer = 0.0;
     }
-    
+
+    gameplay->firstSelection = nullptr;
+    gameplay->secondSelection = nullptr;
   }
   
-  bool EntityClick(Gameplay* gameplay, Level* lvl, Input* input){
-  
-    // printf("CLICLK");
-    if(camera::IsPointInGrid(input->mouse_x, input->mouse_y, &gameplay->lvls[gameplay->currentLvlIndex])){
-      int x = -1;
-      int y = -1;
-      camera::WorldToGrid(input->mouse_x, input->mouse_y, &x, &y, &gameplay->lvls[gameplay->currentLvlIndex]);
-
-      
-      if(GetCellID(&gameplay->lvls[gameplay->currentLvlIndex], (float)x, (float)y) == 1){
-        if(gameplay->firstSelection != nullptr){
-          gameplay->secondSelection = GetEntity(lvl, x, y);
-          printf("First : ID: %hhu, X: %d , Y: %d\n", gameplay->firstSelection->id, gameplay->firstSelection->xPos, gameplay->firstSelection->yPos);
-          printf("Second: ID: %hhu, X: %d , Y: %d\n", gameplay->secondSelection->id, gameplay->secondSelection->xPos, gameplay->secondSelection->yPos);
-
-          
-          Entity* first = gameplay->firstSelection;
-          Entity* second = gameplay->secondSelection;
-
-          // if same entity is clicked
-          if(first == second){
-            gameplay->firstSelection = nullptr;
-            gameplay->secondSelection = nullptr;
-            return false;
-          }
-
-          // if not neighbour
-          if(
-            !(abs(first->xPos - second->xPos) == 1 && first->yPos == second->yPos ||
-            first->xPos == second->xPos && abs(first->yPos - second->yPos) == 1
-            )){
-
-            printf("NO NEIGHBOUR!\n");
-            gameplay->firstSelection = nullptr;
-            gameplay->secondSelection = nullptr;
-            return false;
-          }
-
-          gameplay->animationInProgress = true;
-          
-          Entity tempEntity = *gameplay->firstSelection;
-          
-          // SWAPPING
-          // set previous
-          first->xPrev = first->xPos;
-          first->yPrev = first->yPos;
-          second->xPrev = second->xPos;
-          second->yPrev = second->yPos;
-          // set current
-          first->xPos = second->xPos;
-          first->yPos = second->yPos;
-          second->xPos = tempEntity.xPos;
-          second->yPos = tempEntity.yPos;
-          // set progress
-          first->progress01 = 0;
-          second->progress01 = 0;
-          
-          gameplay->firstSelection = nullptr;
-          gameplay->secondSelection = nullptr;
-          
-          return true;
-        }
-        else{
-          gameplay->firstSelection = GetEntity(lvl, x, y);
-          printf("First : ID: %hhu, X: %d , Y: %d\n", gameplay->firstSelection->id, gameplay->firstSelection->xPos, gameplay->firstSelection->yPos);
-          printf("Second: ID: -, X: - , Y: -\n");
-          return false;
-        }
-
-      }
-      else{
-        gameplay->firstSelection = nullptr;
-      }
-    }
-    else{
-      gameplay->firstSelection = nullptr;
-      printf("First : ID: -, X: - , Y: -\n");
-      printf("Second: ID: -, X: - , Y: -\n");
-      return false;
-    }
-    return false;
-  }
 
 
   bool InBounds(Level* lvl, int x, int y){
-    return x >= 0 && y >= 0 && x < lvl->w && y < lvl->h;
+    return x >= 1 && y >= 0 && x < lvl->w - 1 && y < lvl->h - 1;
   }
 
   bool ContainsEntity(std::vector<Entity*>& list, Entity* entity){
@@ -339,6 +239,186 @@ extern "C" {
     }
   }
 
+  
+
+  bool checkIfSwapIsMatch(Level* lvl, Entity* swapper1, Entity* swapper2){
+    // Level lvlTmp = *lvl;
+    // Entity shapeBuffer = *lvl->shapeBuffer;
+    // lvlTmp.shapeBuffer = &shapeBuffer;
+    // Entity* swapper1Tmp = GetEntity(&lvlTmp, swapper1->xPos, swapper1->yPos);
+    // Entity* swapper2Tmp = GetEntity(&lvlTmp, swapper2->xPos, swapper2->yPos);
+    // int xTmp = swapper1->xPos;
+    // int yTmp = swapper1->yPos;
+    // swapper1Tmp->xPos = swapper2Tmp->xPos;
+    // swapper1Tmp->yPos = swapper2Tmp->yPos;
+    // swapper2Tmp->xPos = xTmp;
+    // swapper2Tmp->yPos = yTmp;
+
+    bool matched = false;
+    // swap temporarily
+    int xTmp = swapper1->xPos;
+    int yTmp = swapper1->yPos;
+    
+    swapper1->xPos = swapper2->xPos;
+    swapper1->yPos = swapper2->yPos;
+    swapper2->xPos = xTmp;
+    swapper2->yPos = yTmp;
+    
+
+    // SWAPPER1
+    // hori
+    Entity* testEntity = GetEntity(lvl, swapper1->xPos + 1, swapper1->yPos);
+    if(testEntity != nullptr && swapper1->id == testEntity->id){
+      testEntity = GetEntity(lvl, swapper1->xPos + 2, swapper1->yPos);      
+      if(testEntity != nullptr && swapper1->id == testEntity->id){
+        matched = true;
+      }
+      testEntity = GetEntity(lvl, swapper1->xPos - 1, swapper1->yPos);      
+      if(testEntity != nullptr && swapper1->id == testEntity->id){
+        matched = true;
+      }
+    }
+    testEntity = GetEntity(lvl, swapper1->xPos - 1, swapper1->yPos);
+    if(testEntity != nullptr && swapper1->id == testEntity->id){
+      testEntity = GetEntity(lvl, swapper1->xPos - 2, swapper1->yPos);
+      if(testEntity != nullptr && swapper1->id == testEntity->id){
+        matched = true;
+      }
+    }
+    // vert
+    testEntity = GetEntity(lvl, swapper1->xPos, swapper1->yPos + 1);
+    if(testEntity != nullptr && swapper1->id == testEntity->id){
+      testEntity = GetEntity(lvl, swapper1->xPos, swapper1->yPos + 2);
+      if(testEntity != nullptr && swapper1->id == testEntity->id){
+        matched = true;
+      }
+      testEntity = GetEntity(lvl, swapper1->xPos, swapper1->yPos - 1);
+      if(testEntity != nullptr && swapper1->id == testEntity->id){
+        matched = true;
+      }
+    }
+    testEntity = GetEntity(lvl, swapper1->xPos, swapper1->yPos - 1);
+    if(testEntity != nullptr && swapper1->id == testEntity->id){
+      testEntity = GetEntity(lvl, swapper1->xPos, swapper1->yPos - 2);
+      if(testEntity != nullptr && swapper1->id == testEntity->id){
+        matched = true;
+      }
+    }
+
+    // SWAPPER2
+    // hori
+    testEntity = GetEntity(lvl, swapper2->xPos + 1, swapper2->yPos);
+    if(testEntity != nullptr && swapper2->id == testEntity->id){
+      testEntity = GetEntity(lvl, swapper2->xPos + 2, swapper2->yPos);      
+      if(testEntity != nullptr && swapper2->id == testEntity->id){
+        matched = true;
+      }
+      testEntity = GetEntity(lvl, swapper2->xPos - 1, swapper2->yPos);      
+      if(testEntity != nullptr && swapper2->id == testEntity->id){
+        matched = true;
+      }
+    }
+    testEntity = GetEntity(lvl, swapper2->xPos - 1, swapper2->yPos);
+    if(testEntity != nullptr && swapper2->id == testEntity->id){
+      testEntity = GetEntity(lvl, swapper2->xPos - 2, swapper2->yPos);
+      if(testEntity != nullptr && swapper2->id == testEntity->id){
+        matched = true;
+      }
+    }
+    // vert
+    testEntity = GetEntity(lvl, swapper2->xPos, swapper2->yPos + 1);
+    if(testEntity != nullptr && swapper2->id == testEntity->id){
+      testEntity = GetEntity(lvl, swapper2->xPos, swapper2->yPos + 2);
+      if(testEntity != nullptr && swapper2->id == testEntity->id){
+        matched = true;
+      }
+      testEntity = GetEntity(lvl, swapper2->xPos, swapper2->yPos - 1);
+      if(testEntity != nullptr && swapper2->id == testEntity->id){
+        matched = true;
+      }
+    }
+    testEntity = GetEntity(lvl, swapper2->xPos, swapper2->yPos - 1);
+    if(testEntity != nullptr && swapper2->id == testEntity->id){
+      testEntity = GetEntity(lvl, swapper2->xPos, swapper2->yPos - 2);
+      if(testEntity != nullptr && swapper2->id == testEntity->id){
+        matched = true;
+      }
+    }
+
+    // swap back
+    xTmp = swapper1->xPos;
+    yTmp = swapper1->yPos;
+
+    swapper1->xPos = swapper2->xPos;
+    swapper1->yPos = swapper2->yPos;
+    swapper2->xPos = xTmp;
+    swapper2->yPos = yTmp;
+
+    /*
+    std::vector<Entity *> dummyMatchedEntities;
+    if(
+        3 <= ComboCheck(&lvlTmp, swapper1Tmp->id, swapper1->xPos, swapper1->yPos, -1, 0, dummyMatchedEntities) ||
+        3 <= ComboCheck(&lvlTmp, swapper1Tmp->id, swapper1->xPos, swapper1->yPos, 1, 0, dummyMatchedEntities) ||
+        3 <= ComboCheck(&lvlTmp, swapper1Tmp->id, swapper1->xPos, swapper1->yPos, 0, -1, dummyMatchedEntities) ||
+        3 <= ComboCheck(&lvlTmp, swapper1Tmp->id, swapper1->xPos, swapper1->yPos, 0, 1, dummyMatchedEntities) ||
+
+        3 <= ComboCheck(&lvlTmp, swapper2Tmp->id, swapper2->xPos, swapper2->yPos, -1, 0, dummyMatchedEntities) ||
+        3 <= ComboCheck(&lvlTmp, swapper2Tmp->id, swapper2->xPos, swapper2->yPos, 1, 0, dummyMatchedEntities) ||
+        3 <= ComboCheck(&lvlTmp, swapper2Tmp->id, swapper2->xPos, swapper2->yPos, 0, -1, dummyMatchedEntities) ||
+        3 <= ComboCheck(&lvlTmp, swapper2Tmp->id, swapper2->xPos, swapper2->yPos, 0, 1, dummyMatchedEntities)){
+      return true;
+    }*/
+    return matched;
+
+
+    
+    /* OLD STUFF
+    Entity tmpSwapper1 = *swapper1;
+    Entity tmpSwapper2 = *swapper2;
+    
+    for(int y = 0; y < lvl->h; y++){
+      for(int x = 0; x < lvl->w; x++){
+        Entity* entity = GetEntity(lvl, x, y);
+        if(entity == nullptr || entity->id == ENTITY_ID::NONE || entity->id == ENTITY_ID::MATCHED){
+          continue;
+        }
+        // CHECK SWAPPER1
+        // horizontal
+        if(
+            x + 2 < lvl->w - 1 &&
+            GetEntity(lvl, swapper2->xPos + 1, swapper2->yPos)->id == swapper1->id &&
+            GetEntity(lvl, swapper2->xPos + 2, swapper2->yPos)->id == swapper1->id){
+          return true;
+        }
+        // vertical
+        if(
+            x + 2 < lvl->w - 1 &&
+            GetEntity(lvl, swapper2->xPos, swapper2->yPos + 1)->id == swapper1->id &&
+            GetEntity(lvl, swapper2->xPos, swapper2->yPos + 2)->id == swapper1->id){
+          return true;
+        }
+
+        // CHECK SWAPPER2
+        // horizontal
+        if(
+            x + 2 < lvl->w - 1 &&
+            GetEntity(lvl, swapper1->xPos + 1, swapper1->yPos)->id == swapper2->id &&
+            GetEntity(lvl, swapper1->xPos + 2, swapper1->yPos)->id == swapper2->id){
+          return true;
+        }
+        // vertical
+        if(
+            x + 2 < lvl->w - 1 &&
+            GetEntity(lvl, swapper1->xPos, swapper1->yPos + 1)->id == swapper2->id &&
+            GetEntity(lvl, swapper1->xPos, swapper1->yPos + 2)->id == swapper2->id){
+          return true;
+        }
+      }
+    }
+    return false;
+    */
+  }
+  
   bool ScanBoard(Level* lvl){
     int maxMatches = lvl->w * lvl->h;
     std::vector<Entity*> matchedEntities;
@@ -396,6 +476,112 @@ extern "C" {
     return true;
   }
 
+  bool EntityClick(Gameplay* gameplay, Level* lvl, Input* input){
+  
+    // printf("CLICLK");
+    if(!camera::IsPointInGrid(input->mouse_x, input->mouse_y, &gameplay->lvls[gameplay->currentLvlIndex])){
+      printf("First : ID: -, X: - , Y: -\n");
+      printf("Second: ID: -, X: - , Y: -\n");
+
+      ClearEntitySelection(gameplay);
+      return false;
+    }
+
+    int x = -1;
+    int y = -1;
+    camera::WorldToGrid(input->mouse_x, input->mouse_y, &x, &y, &gameplay->lvls[gameplay->currentLvlIndex]);
+
+    // check if cell is not background
+    if(GetCellID(&gameplay->lvls[gameplay->currentLvlIndex], (float)x, (float)y) != 1){
+      printf("Cell is not background!\n");
+      ClearEntitySelection(gameplay);
+      return false;
+    }
+    // check if click on nothing - nullptr
+    Entity* entity = GetEntity(lvl, x, y);
+    if(entity == nullptr){
+      printf("NOTHING CLICKED\n");
+      ClearEntitySelection(gameplay);
+      return false;
+    }
+    // SET FIRST SELECTION!
+    if(gameplay->firstSelection == nullptr){
+      gameplay->firstSelection = entity;
+      gameplay->firstSelection->scaleUp = true;
+      gameplay->firstSelection->scaleTimer = 0.0;
+    printf("First : ID: %hhu, X: %d , Y: %d\n", gameplay->firstSelection->id, gameplay->firstSelection->xPos, gameplay->firstSelection->yPos);
+    printf("Second: ID: -, X: - , Y: -\n");
+      return false;
+    }
+
+    // if same entity is clicked
+    if(entity == gameplay->firstSelection){
+      ClearEntitySelection(gameplay);
+      return false;
+    }
+
+    Entity* first = gameplay->firstSelection;
+    Entity* second = entity;
+
+    // if not neighbour
+    if(
+      !(abs(first->xPos - second->xPos) == 1 && first->yPos == second->yPos ||
+      first->xPos == second->xPos && abs(first->yPos - second->yPos) == 1
+      )){
+
+      printf("NO NEIGHBOUR!\n");
+      ClearEntitySelection(gameplay);
+      return false;
+    }
+    
+    gameplay->secondSelection = entity;
+    printf("First : ID: %hhu, X: %d , Y: %d\n", gameplay->firstSelection->id, gameplay->firstSelection->xPos, gameplay->firstSelection->yPos);
+    printf("Second: ID: %hhu, X: %d , Y: %d\n", gameplay->secondSelection->id, gameplay->secondSelection->xPos, gameplay->secondSelection->yPos);
+
+    // check if swap will match
+    if(checkIfSwapIsMatch(lvl, first, second) == false){
+      ClearEntitySelection(gameplay);
+      return false;
+    }
+    gameplay->animationInProgress = true;
+    
+    Entity tempEntity = *gameplay->firstSelection;
+    
+    // SWAPPING
+    // set previous
+    first->xPrev = first->xPos;
+    first->yPrev = first->yPos;
+    second->xPrev = second->xPos;
+    second->yPrev = second->yPos;
+    // set current
+    first->xPos = second->xPos;
+    first->yPos = second->yPos;
+    second->xPos = tempEntity.xPos;
+    second->yPos = tempEntity.yPos;
+    // set progress
+    first->progress01 = 0.0;
+    second->progress01 = 0.0;
+
+    first->scaleUp = false;
+    second->scaleUp = false;
+    // first->scaleTimer = 0.0;
+    // second->scaleTimer = 0.0;
+
+    gameplay->firstSelection = nullptr;
+    gameplay->secondSelection = nullptr;
+    
+    
+    // ClearEntitySelection(gameplay);
+    return true;
+    // else{
+    //   gameplay->firstSelection->scaleUp = false;
+    //   gameplay->firstSelection = nullptr;
+      // printf("First : ID: -, X: - , Y: -\n");
+      // printf("Second: ID: -, X: - , Y: -\n");
+    //   return false;
+    // }
+    // return false;
+  }
   
   void UpdateGame(Gameplay* gameplay, Input* input, const float dt){
     Level* lvl = &gameplay->lvls[gameplay->currentLvlIndex];
@@ -403,8 +589,11 @@ extern "C" {
     
     for(int i = 0; i < lvl->entityCount; i++){
       Entity& shape = lvl->shapeBuffer[i];
+      // shape pos progress
       if(shape.progress01 < 1.0f){
         shape.progress01 += dt / 1.5f;
+        // shape.progress01 = lerp(shape.progress01, 1.0,  ((std::sin(dt) + 1.0f) / 2.0f));
+
         if(shape.progress01 > 1.0f){
           shape.progress01 = 1.0f;
         }
@@ -412,6 +601,14 @@ extern "C" {
       if(shape.id != ENTITY_ID::NONE && shape.progress01 < 1.0){
         gameplay->animationInProgress = true;
       }
+      // shape scale timer
+      if(shape.scaleUp){
+        shape.scaleTimer += dt;
+      }
+      else{
+        shape.scaleTimer = 0;
+      }
+
     }
     if(gameplay->animationInProgress == false){
       if(ScanBoard(lvl)){
@@ -423,7 +620,7 @@ extern "C" {
     // Mouse input
     if(MousePressed(input, MouseButtons::LEFT) && gameplay->animationInProgress == false){
       if(EntityClick(gameplay, lvl, input)){
-        ScanBoard(lvl);  
+        // ScanBoard(lvl);  
       }
     }
     
@@ -473,7 +670,8 @@ extern "C" {
 
     
         
-    ChangeScene(data, SCENE_TYPES::TITLESCREEN);
+    // ChangeScene(data, SCENE_TYPES::TITLESCREEN);
+    ChangeScene(data, SCENE_TYPES::GAME);
 
     PlaySong(SONG_ID::THEME);
     PlaySong(SONG_ID::WAVES);
@@ -544,12 +742,6 @@ extern "C" {
     }
 
     
-    Level* currentLvl = &data->scenes.gameplay.lvls[data->scenes.gameplay.currentLvlIndex];
-    // 3 in a row
-    for(int x = 0; x < currentLvl->w; x++){
-      // ENTITY_ID a = currentLvl->shapeBuffer
-      
-    }
 
     
     

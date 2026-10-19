@@ -46,6 +46,10 @@ void InitializeLevel(Arena* arena_levels, Level* lvl, int w, int h){
       shape.xPrev = x+1;
       shape.yPrev = -1;
       shape.progress01 = 0.0f;
+      
+      shape.scale = 1.0;
+      shape.scaleUp = false;
+      shape.scaleTimer = 0.0;
     }
   }
 
@@ -157,6 +161,8 @@ Entity* GetEntity(Level* lvl, int x, int y){
         lvl->shapeBuffer[i].id != ENTITY_ID::MATCHED &&
         lvl->shapeBuffer[i].xPos == x &&
         lvl->shapeBuffer[i].yPos == y ){
+        // lvl->shapeBuffer[i].scaleUp = false;
+        // lvl->shapeBuffer[i].scaleTimer = 0.0;
         return &lvl->shapeBuffer[i];
       }
     }

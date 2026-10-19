@@ -23,5 +23,14 @@ struct Entity{
   int yPrev;
   float progress01;
   
+  bool scaleUp = false;
+  float scale = 1;
+  float scaleTimer = 0;
+
+  Entity(){
+    scale = 1.0;
+    scaleUp = false;
+    scaleTimer = 0.0;
+  }
 };
 

@@ -12,7 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 
-void RenderSprite_World(SpriteRenderInfo spriteRenderInfo, SDL_Renderer* renderer, const Camera* camera, float x, float y, float scale, float alpha, bool flipped){
+void RenderSprite_World(SpriteRenderInfo spriteRenderInfo, SDL_Renderer* renderer, const Camera* camera, float x, float y, float scale, float alpha, bool flipped, bool scaleUp){
   int frame = spriteRenderInfo.frame;
   Sprite* sprite = spriteRenderInfo.sprite;
   SDL_FRect tilesetRect;
@@ -45,6 +45,10 @@ void RenderSprite_World(SpriteRenderInfo spriteRenderInfo, SDL_Renderer* rendere
   rect.y -= camera->camera_y;
   }
 
+  if(scaleUp){
+    rect.x -= (rect.w - tilesetRect.w * UPSCALE_FACTOR) / 2.0;
+    rect.y -= (rect.h - tilesetRect.h * UPSCALE_FACTOR) / 2.0;
+  }
   
   SDL_SetTextureScaleMode(sprite->texture, SDL_SCALEMODE_PIXELART);
   SDL_SetTextureAlphaModFloat(sprite->texture, alpha);
@@ -52,9 +56,9 @@ void RenderSprite_World(SpriteRenderInfo spriteRenderInfo, SDL_Renderer* rendere
   SDL_RenderTextureRotated(renderer, sprite->texture, &tilesetRect, &rect, 0, 0, flip);
 }
 
-void RenderSprite_Grid(Sprite* sprite, Level* lvl, SDL_Renderer* renderer, const Camera* camera, float xPos, float yPos, float scale, float alpha, bool flipped){
+void RenderSprite_Grid(Sprite* sprite, Level* lvl, SDL_Renderer* renderer, const Camera* camera, float xPos, float yPos, float scale, float alpha, bool flipped, bool scaleUp){
   camera::GridToWorld(&xPos, &yPos, lvl);
-  RenderSprite_World(sprite, renderer, camera, xPos, yPos);
+  RenderSprite_World(sprite, renderer, camera, xPos, yPos, scale, alpha, flipped, scaleUp);
 }
 
 

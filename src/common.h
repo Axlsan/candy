@@ -15,7 +15,7 @@ constexpr double FRAME_TIME_MS = 1000.0 / FPS;
 const float UNDO_REPEAT_TIME = 0.15;
 const int SCREEN_WIDTH = 1920 / 3 * 2;
 const int SCREEN_HEIGHT = 1080 / 3 * 2;
-const int UPSCALE_FACTOR = 4;
+const int UPSCALE_FACTOR = 3;
 const int SPRITE_SIZE = 8;
 
 const int TILE_SIZE_PX_RAW = 16;

@@ -31,6 +31,7 @@ struct Gameplay{
   Entity* secondSelection;
 
   bool animationInProgress;
+  
 };
 
 struct MainMenu{

@@ -51,10 +51,16 @@ void RenderEntities(GameData* data, SDL_Renderer* renderer){
     Sprite* sprite = GetSpriteFromEntityID(entity->id, data->spriteBuffer);
 
     // Animation
-    float xAnimated = std::lerp(entity->xPrev, entity->xPos, entity->progress01);
-    float yAnimated = std::lerp(entity->yPrev, entity->yPos, entity->progress01);
+    float xAnimated = std::lerp(entity->xPrev, entity->xPos, entity->progress01 < 0.5 ? 4 * entity->progress01 * entity->progress01 * entity->progress01 : 1 - std::pow(-2 * entity->progress01 + 2, 3) / 2);
+    float yAnimated = std::lerp(entity->yPrev, entity->yPos, entity->progress01 < 0.5 ? 4 * entity->progress01 * entity->progress01 * entity->progress01 : 1 - std::pow(-2 * entity->progress01 + 2, 3) / 2);
 
-    // RenderEntity_OnTile(sprite, lvl, renderer, &data->camera, xAnimated, yAnimated, 1, 1)
-    RenderSprite_Grid(sprite, lvl, renderer, &data->camera, xAnimated, yAnimated);
+    // // Animation
+    // float xAnimated = std::lerp(entity->xPrev, entity->xPos, std::pow(entity->progress01, 3));
+    // float yAnimated = std::lerp(entity->yPrev, entity->yPos, std::pow(entity->progress01, 3));
+
+    float scaleAnimated = entity->scaleUp ? 1.0 + sin(entity->scaleTimer) / 3 : 1.0;
+
+// RenderEntity_OnTile(sprite, lvl, renderer, &data->camera, xAnimated, yAnimated, 1, 1)
+    RenderSprite_Grid(sprite, lvl, renderer, &data->camera, xAnimated, yAnimated, scaleAnimated, 1, false, entity->scaleUp);
   }
 }
